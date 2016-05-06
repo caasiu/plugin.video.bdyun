@@ -28,10 +28,13 @@ def main_menu():
         'is_playable': False,
         'icon': pcs_info['avatar_url']
         },{
-        'label': u'## 搜索',
+        'label': u'## 搜索视频或音频',
         'path': plugin.url_for('search'),
         'is_playable': False
         }]
+        pcs_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path='/')
+        item_list = mk_list(pcs_files)
+        items.extend(item_list)
     return plugin.finish(items , update_listing=True)
 
 
@@ -43,7 +46,7 @@ def login_dialog():
         cookie,tokens = get_auth.run(username,password)
         if tokens:
             save_user_info(username,password,cookie,tokens)
-            dialog.ok('',u'登录成功')
+            dialog.ok('',u'登录成功',u'如没有自动转跳，请重新进入该插件')
             return None
     else:
         dialog.ok('Error',u'用户名或密码不能为空')
@@ -84,40 +87,60 @@ def search():
     user_cookie = user_info['cookie']
     user_tokens = user_info['tokens']
     key = dialog.input(u'输入文件名/关键词', type=xbmcgui.INPUT_ALPHANUM)
-    s = pcs.search(user_cookie, user_tokens, key)
-    items = []
-    if len(s['list']) == 1:
-        for result in s['list']:
-            if result['category'] == 1 or result['category'] == 2:
-                item = {
-                        'label': result['server_filename'],
-                        #'path': plugin.url_for('login_dialog'),
-                        'is_playable': False 
-                       }
-                items.append(item)
-        if items:
-            return plugin.finish(items)
+    if key:
+        s = pcs.search(user_cookie, user_tokens, key)
+        items = []
+        if len(s['list']) == 1:
+            for result in s['list']:
+                if result['category'] == 1 or result['category'] == 2:
+                    if 'thumbs' in result and 'url2' in result['thumbs']:   
+                        ThumbPath = result['thumbs']['url2']
+                        item = {
+                                'label': result['server_filename'],
+                                #'path': plugin.url_for('login_dialog'),
+                                'is_playable': True, 
+                                'icon': ThumbPath,
+                                }
+                    else:
+                        item = {
+                                'label': result['server_filename'],
+                                #'path': plugin.url_for('login_dialog'),
+                                'is_playable': True,
+                                }
+                    items.append(item)
+            if items:
+                return plugin.finish(items)
+            else:
+                dialog.ok('',u'搜素的文件不是视频或音频')
+
+        elif s['list']:
+            for result in s['list']:
+                if result['category'] == 1 or result['category'] == 2:
+                    if 'thumbs' in result and 'url2' in result['thumbs']:   
+                        ThumbPath = result['thumbs']['url2']
+                        item = {
+                                'label': result['server_filename'],
+                                #'path': plugin.url_for('login_dialog'),
+                                'is_playable': True, 
+                                'icon': ThumbPath,
+                                }
+                    else:
+                        item = {
+                                'label': result['server_filename'],
+                                #'path': plugin.url_for('login_dialog'),
+                                'is_playable': True,
+                                }
+                    items.append(item)
+            if items:
+                return plugin.finish(items)
+            else:
+                dialog.ok('',u'搜素的文件不是视频或音频')
+
         else:
-            dialog.ok('',u'搜素的文件不是视频或音频')
+            dialog.ok('',u'没有找到文件')
+            return None
 
-    elif s['list']:
-        for result in s['list']:
-            if result['category'] == 1 or result['category'] == 2:
-                item = {
-                        'label': result['path'],
-                        #'path': plugin.url_for('login_dialog'),
-                        'is_playable': False
-                       }
-                items.append(item)
-        if items:
-            return plugin.finish(items)
-        else:
-            dialog.ok('',u'搜素的文件不是视频或音频')
-
-    else:
-        dialog.ok('',u'没有找到文件')
-
-    return None
+    return 
 
 
 def get_user_info():
@@ -134,6 +157,36 @@ def save_user_info(username, password, cookie, tokens):
     user_info['cookie'] = cookie
     user_info['tokens'] = tokens
     info.sync()
+
+
+def mk_list(pcs_files):
+    item_list = []
+    for result in pcs_files:
+        if result['isdir'] == 1:
+            item = {
+                    'label': result['server_filename'],
+                    #'path': plugin.url_for('login_dialog'),
+                    'is_playable': False 
+                    }
+            item_list.append(item)
+        elif result['category'] == 1 or result['category'] == 2:
+            if 'thumbs' in result and 'url2' in result['thumbs']:   
+                ThumbPath = result['thumbs']['url2']
+                item = {
+                        'label': result['server_filename'],
+                        #'path': plugin.url_for('login_dialog'),
+                        'is_playable': True, 
+                        'icon': ThumbPath,
+                        }
+            else:
+                item = {
+                        'label': result['server_filename'],
+                        #'path': plugin.url_for('login_dialog'),
+                        'is_playable': True,
+                        }
+            item_list.append(item)
+    return item_list
+    
 
 
 if __name__ == '__main__':
