@@ -35,13 +35,13 @@ def main_menu():
         pcs_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path='/')
         item_list = mk_list(pcs_files)
         items.extend(item_list)
-    return plugin.finish(items , update_listing=True)
+    return plugin.finish(items, update_listing=True)
 
 
 @plugin.route('/login_dialog/')
 def login_dialog():
-    username = dialog.input('username:', type=xbmcgui.INPUT_ALPHANUM)
-    password = dialog.input('password:', type=xbmcgui.INPUT_ALPHANUM, option=xbmcgui.ALPHANUM_HIDE_INPUT)
+    username = dialog.input(u'用户名:', type=xbmcgui.INPUT_ALPHANUM)
+    password = dialog.input(u'密码:', type=xbmcgui.INPUT_ALPHANUM, option=xbmcgui.ALPHANUM_HIDE_INPUT)
     if username and password:
         cookie,tokens = get_auth.run(username,password)
         if tokens:
@@ -143,6 +143,29 @@ def search():
     return 
 
 
+@plugin.route('/directory/<path>')
+def directory(path):
+    user_info = get_user_info()
+    user_cookie = user_info['cookie']
+    user_tokens = user_info['tokens']
+    dir_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path.decode('utf-8'))
+    item_list = mk_list(dir_files)
+
+    previous_path = os.path.dirname(path)
+    if previous_path == '/':
+        item_list.insert(0,{
+                'label': u'返回首页',
+                'path': plugin.url_for('main_menu')
+            })
+    else:
+        item_list.insert(0,{
+                'label': u'<< 返回上一层',
+                'path': plugin.url_for('directory', path=previous_path),
+            })
+
+    return plugin.finish(item_list, update_listing=True)
+
+
 def get_user_info():
     info = plugin.get_storage('info')
     user_info = info.get('user_info')
@@ -165,7 +188,7 @@ def mk_list(pcs_files):
         if result['isdir'] == 1:
             item = {
                     'label': result['server_filename'],
-                    #'path': plugin.url_for('login_dialog'),
+                    'path': plugin.url_for('directory', path=result['path'].encode('utf-8')),
                     'is_playable': False 
                     }
             item_list.append(item)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.video.bdyun" name="百度云盘" version="0.2.1" provider-name="caasiu">
+<addon id="plugin.video.bdyun" name="百度云盘" version="0.3.0" provider-name="caasiu">
 	<requires>
 		<import addon="xbmc.python" version="2.20.0" />
 		<import addon="script.module.xbmcswift2" version="2.4.0" />
@@ -15,7 +15,7 @@
         <summary lang="en">Baidu Yun (Personal Cloud Storage)</summary>
         <summary lang="zh">百度云</summary>
         <description lang="en">This is Baidu Yun client for kodi/xbmc</description>
-        <description lang="zh">在Kodi/xbmc播放百度云盘中的视频和音频</description>    
+        <description lang="zh">在kodi/xbmc播放百度云盘中的视频和音频</description>    
 		<license>GNU General Public License, v3</license>
 		<language></language>
 	</extension>

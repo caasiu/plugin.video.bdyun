@@ -90,7 +90,7 @@ def list_dir_all(cookie, tokens, path):
         if not content:
             #return (path, None)
             return None
-        if not content['list'] or page == 3:
+        if not content['list']:
             #return (path, pcs_files)
             return pcs_files
         pcs_files.extend(content['list'])
