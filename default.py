@@ -21,19 +21,37 @@ def main_menu():
         'is_playable': False
         }]
     else:
-        pcs_info = pcs.get_pcs_info(user_info['cookie'], user_info['tokens'])
+        user_pcs = plugin.get_storage('user_pcs', TTL=60*12)
+        PcsInfo = user_pcs.get('PcsInfo')
+        if PcsInfo is None:
+            user_pcs = plugin.get_storage('user_pcs', TTL=60*12)
+            pcs_info = pcs.get_pcs_info(user_info['cookie'], user_info['tokens'])
+            user_pcs['PcsInfo'] = pcs_info
+            avatar_url = pcs_info['avatar_url']
+        else:
+            avatar_url = PcsInfo['avatar_url']
         items = [{
         'label': u'## 当前帐号: %s' %user_info['username'],
         'path': plugin.url_for('accout_setting'),
         'is_playable': False,
-        'icon': pcs_info['avatar_url']
+#        'icon': pcs_info['avatar_url'],
+        'icon': avatar_url
         },{
         'label': u'## 搜索视频或音频',
         'path': plugin.url_for('search'),
         'is_playable': False
+        },{
+        'label': u'## 刷新 (若没有刷新请重新进入插件)',
+        'path': plugin.url_for('refresh'),
+        'is_playable': False
         }]
-        pcs_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path='/')
-        item_list = mk_list(pcs_files)
+#        pcs_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path='/')
+#        item_list = MakeList(pcs_files)
+        homemenu = plugin.get_storage('homemenu')
+        if homemenu.get('item_list'):
+            item_list = homemenu.get('item_list')
+        else:
+            item_list = menu_cache(user_info['cookie'], user_info['tokens'])
         items.extend(item_list)
     return plugin.finish(items, update_listing=True)
 
@@ -46,7 +64,7 @@ def login_dialog():
         cookie,tokens = get_auth.run(username,password)
         if tokens:
             save_user_info(username,password,cookie,tokens)
-            dialog.ok('',u'登录成功',u'如没有自动转跳，请重新进入该插件')
+            dialog.ok('',u'登录成功',u'如没有自动转跳，请重新进入该插件(第一次请耐心等待)')
             return None
     else:
         dialog.ok('Error',u'用户名或密码不能为空')
@@ -76,7 +94,11 @@ def accout_setting():
 @plugin.route('/accout_setting/clear_cache/')
 def clear_cache():
     info = plugin.get_storage('info')
+    homemenu = plugin.get_storage('homemenu')
+    pcs_info = plugin.get_storage('pcs_info')
     info.clear()
+    homemenu.clear()
+    pcs_info.clear()
     dialog.ok('',u'清理完毕')
     return
 
@@ -119,14 +141,14 @@ def search():
                     if 'thumbs' in result and 'url2' in result['thumbs']:   
                         ThumbPath = result['thumbs']['url2']
                         item = {
-                                'label': result['server_filename'],
+                                'label': result['path'],
                                 #'path': plugin.url_for('login_dialog'),
                                 'is_playable': True, 
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
-                                'label': result['server_filename'],
+                                'label': result['path'],
                                 #'path': plugin.url_for('login_dialog'),
                                 'is_playable': True,
                                 }
@@ -149,7 +171,7 @@ def directory(path):
     user_cookie = user_info['cookie']
     user_tokens = user_info['tokens']
     dir_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path.decode('utf-8'))
-    item_list = mk_list(dir_files)
+    item_list = MakeList(dir_files)
 
     previous_path = os.path.dirname(path)
     if previous_path == '/':
@@ -164,6 +186,22 @@ def directory(path):
             })
 
     return plugin.finish(item_list, update_listing=True)
+
+
+@plugin.route('/refresh/')
+def refresh():
+    homemenu = plugin.get_storage('homemenu')
+    homemenu.clear()
+    plugin.url_for('main_menu')
+
+
+# cache the output of content menu
+def menu_cache(cookie, tokens):
+    pcs_files = pcs.list_dir_all(cookie, tokens, path='/')
+    item_list = MakeList(pcs_files)
+    homemenu = plugin.get_storage('homemenu', TTL=30)
+    homemenu['item_list'] = item_list
+    return item_list
 
 
 def get_user_info():
@@ -182,7 +220,7 @@ def save_user_info(username, password, cookie, tokens):
     info.sync()
 
 
-def mk_list(pcs_files):
+def MakeList(pcs_files):
     item_list = []
     for result in pcs_files:
         if result['isdir'] == 1:
