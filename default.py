@@ -3,8 +3,7 @@
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json 
 
-from lib.resource import get_auth
-from lib.resource import pcs
+from lib.resource import get_auth, pcs, utils
 from xbmcswift2 import Plugin
 
 plugin = Plugin()
@@ -26,15 +25,18 @@ def main_menu():
         if PcsInfo is None:
             user_pcs = plugin.get_storage('user_pcs', TTL=60*12)
             pcs_info = pcs.get_pcs_info(user_info['cookie'], user_info['tokens'])
-            user_pcs['PcsInfo'] = pcs_info
-            avatar_url = pcs_info['avatar_url']
+            if pcs_info:
+                user_pcs['PcsInfo'] = pcs_info
+                avatar_url = pcs_info['avatar_url']
+            else:
+                avatar_url = ''
+                dialog.ok('Error',u'请重新登录',u'点击当前帐号，再点击登出')
         else:
             avatar_url = PcsInfo['avatar_url']
         items = [{
         'label': u'## 当前帐号: %s' %user_info['username'],
         'path': plugin.url_for('accout_setting'),
         'is_playable': False,
-#        'icon': pcs_info['avatar_url'],
         'icon': avatar_url
         },{
         'label': u'## 搜索视频或音频',
@@ -45,14 +47,15 @@ def main_menu():
         'path': plugin.url_for('refresh'),
         'is_playable': False
         }]
-#        pcs_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path='/')
-#        item_list = MakeList(pcs_files)
-        homemenu = plugin.get_storage('homemenu')
-        if homemenu.get('item_list'):
-            item_list = homemenu.get('item_list')
-        else:
-            item_list = menu_cache(user_info['cookie'], user_info['tokens'])
-        items.extend(item_list)
+
+        if avatar_url:
+            homemenu = plugin.get_storage('homemenu')
+            if homemenu.get('item_list'):
+                item_list = homemenu.get('item_list')
+            else:
+                item_list = menu_cache(user_info['cookie'], user_info['tokens'])
+            items.extend(item_list)
+
     return plugin.finish(items, update_listing=True)
 
 
@@ -77,9 +80,6 @@ def accout_setting():
     items = [{
     'label': u'登出和清除缓存',
     'path': plugin.url_for('clear_cache'),
-    'is_playable': False
-    },{
-    'label': 'relogin',
     'is_playable': False
     },{
     'label': 'setting',
