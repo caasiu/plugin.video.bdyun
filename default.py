@@ -119,14 +119,14 @@ def search():
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['server_filename'],
-                                #'path': plugin.url_for('login_dialog'),
+                                'path': playlist_path(result['path']),
                                 'is_playable': True, 
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
                                 'label': result['server_filename'],
-                                #'path': plugin.url_for('login_dialog'),
+                                'path': playlist_path(result['path']),
                                 'is_playable': True,
                                 }
                     items.append(item)
@@ -142,14 +142,14 @@ def search():
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['path'],
-                                #'path': plugin.url_for('login_dialog'),
+                                'path': playlist_path(result['path']),
                                 'is_playable': True, 
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
                                 'label': result['path'],
-                                #'path': plugin.url_for('login_dialog'),
+                                'path': playlist_path(result['path']),
                                 'is_playable': True,
                                 }
                     items.append(item)
@@ -235,19 +235,45 @@ def MakeList(pcs_files):
                 ThumbPath = result['thumbs']['url2']
                 item = {
                         'label': result['server_filename'],
-                        #'path': plugin.url_for('login_dialog'),
+                        'path': playlist_path(result['path']),
                         'is_playable': True, 
                         'icon': ThumbPath,
                         }
             else:
                 item = {
                         'label': result['server_filename'],
-                        #'path': plugin.url_for('login_dialog'),
+                        'path': playlist_path(result['path']),
                         'is_playable': True,
                         }
             item_list.append(item)
     return item_list
     
+
+def playlist_path(pcs_file_path):
+    user_info = get_user_info()
+    user_name = user_info['username']
+    user_cookie = user_info['cookie']
+    user_tokens = user_info['tokens']
+
+    playlist_data = pcs.get_streaming_playlist(user_cookie, pcs_file_path)
+    if playlist_data:
+        raw_dir = os.path.dirname(pcs_file_path)
+        m = re.search('\/(.*)', raw_dir)
+        dirname = m.group(1)
+        basename = os.path.basename(pcs_file_path)
+        r = re.search('(.*)\.(.*)$', basename)
+        filename = ''.join([r.group(1),'.m3u8'])
+        dirpath = os.path.join(utils.data_dir(), user_name, dirname)
+        if not xbmcvfs.exists(dirpath):
+            xbmcvfs.mkdir(dirpath)
+        filepath = os.path.join(dirpath, filename)
+        with open(filepath, 'w') as f:
+            f.write(playlist_data)
+        return filepath
+
+    else:
+        url = pcs.get_download_link(user_cookie, user_tokens, pcs_file_path)
+        return url
 
 
 if __name__ == '__main__':
