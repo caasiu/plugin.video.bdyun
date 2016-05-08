@@ -119,14 +119,14 @@ def search():
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['server_filename'],
-                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
                                 'is_playable': False, 
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
                                 'label': result['server_filename'],
-                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
                                 'is_playable': False, 
                                 }
                     items.append(item)
@@ -142,14 +142,14 @@ def search():
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['path'],
-                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
                                 'is_playable': False, 
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
                                 'label': result['path'],
-                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
                                 'is_playable': False,
                                 }
                     items.append(item)
@@ -195,17 +195,25 @@ def refresh():
     plugin.url_for('main_menu')
 
 
-@plugin.route('/quality/<filepath>')
-def quality(filepath):
-    items = [{
-        'label': u'流畅',
-        'path': playlist_path(filepath.decode('utf-8')),
-        'is_playable': True
-        },{
-        'label': u'高清',
-        #'path':'',
-        'is_playable': True
-        }]
+@plugin.route('/quality/<filepath>/<cat>')
+def quality(filepath, cat):
+    category = int(cat)
+    if category == 1:
+        items = [{
+            'label': u'流畅(推荐)',
+            'path': playlist_path(filepath.decode('utf-8'), stream=True),
+            'is_playable': True
+            },{
+            'label': u'高清',
+            'path': playlist_path(filepath.decode('utf-8'), stream=False),
+            'is_playable': True
+            }]
+    elif category == 2:
+        items = [{
+            'label': u'播放',
+            'path': playlist_path(filepath.decode('utf-8'), stream=False),
+            'is_playable': True
+            }]
     return plugin.finish(items)
 
 
@@ -249,42 +257,44 @@ def MakeList(pcs_files):
                 ThumbPath = result['thumbs']['url2']
                 item = {
                         'label': result['server_filename'],
-                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
                         'is_playable': False, 
                         'icon': ThumbPath,
                         }
             else:
                 item = {
                         'label': result['server_filename'],
-                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
                         'is_playable': False,
                         }
             item_list.append(item)
     return item_list
     
 
-def playlist_path(pcs_file_path):
+def playlist_path(pcs_file_path, stream):
     user_info = get_user_info()
     user_name = user_info['username']
     user_cookie = user_info['cookie']
     user_tokens = user_info['tokens']
 
-    playlist_data = pcs.get_streaming_playlist(user_cookie, pcs_file_path)
-    if playlist_data:
-        raw_dir = os.path.dirname(pcs_file_path)
-        m = re.search('\/(.*)', raw_dir)
-        dirname = m.group(1)
-        basename = os.path.basename(pcs_file_path)
-        r = re.search('(.*)\.(.*)$', basename)
-        filename = ''.join([r.group(1),'.m3u8'])
-        dirpath = os.path.join(utils.data_dir(), user_name, dirname)
-        if not xbmcvfs.exists(dirpath):
-            xbmcvfs.mkdir(dirpath)
-        filepath = os.path.join(dirpath, filename)
-        with open(filepath, 'w') as f:
-            f.write(playlist_data)
-        return filepath
-
+    if stream:
+        playlist_data = pcs.get_streaming_playlist(user_cookie, pcs_file_path)
+        if playlist_data:
+            raw_dir = os.path.dirname(pcs_file_path)
+            m = re.search('\/(.*)', raw_dir)
+            dirname = m.group(1)
+            basename = os.path.basename(pcs_file_path)
+            r = re.search('(.*)\.(.*)$', basename)
+            filename = ''.join([r.group(1),'.m3u8'])
+            dirpath = os.path.join(utils.data_dir(), user_name, dirname)
+            if not xbmcvfs.exists(dirpath):
+                xbmcvfs.mkdir(dirpath)
+            filepath = os.path.join(dirpath, filename)
+            with open(filepath, 'w') as f:
+                f.write(playlist_data)
+            return filepath
+        else:
+            return None
     else:
         url = pcs.get_download_link(user_cookie, user_tokens, pcs_file_path)
         return url
