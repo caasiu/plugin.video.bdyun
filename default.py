@@ -119,15 +119,15 @@ def search():
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['server_filename'],
-                                'path': playlist_path(result['path']),
-                                'is_playable': True, 
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                                'is_playable': False, 
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
                                 'label': result['server_filename'],
-                                'path': playlist_path(result['path']),
-                                'is_playable': True,
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                                'is_playable': False, 
                                 }
                     items.append(item)
             if items:
@@ -142,15 +142,15 @@ def search():
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['path'],
-                                'path': playlist_path(result['path']),
-                                'is_playable': True, 
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                                'is_playable': False, 
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
                                 'label': result['path'],
-                                'path': playlist_path(result['path']),
-                                'is_playable': True,
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                                'is_playable': False,
                                 }
                     items.append(item)
             if items:
@@ -195,11 +195,25 @@ def refresh():
     plugin.url_for('main_menu')
 
 
+@plugin.route('/quality/<filepath>')
+def quality(filepath):
+    items = [{
+        'label': u'流畅',
+        'path': playlist_path(filepath.decode('utf-8')),
+        'is_playable': True
+        },{
+        'label': u'高清',
+        #'path':'',
+        'is_playable': True
+        }]
+    return plugin.finish(items)
+
+
 # cache the output of content menu
 def menu_cache(cookie, tokens):
     pcs_files = pcs.list_dir_all(cookie, tokens, path='/')
     item_list = MakeList(pcs_files)
-    homemenu = plugin.get_storage('homemenu', TTL=30)
+    homemenu = plugin.get_storage('homemenu', TTL=60)
     homemenu['item_list'] = item_list
     return item_list
 
@@ -235,15 +249,15 @@ def MakeList(pcs_files):
                 ThumbPath = result['thumbs']['url2']
                 item = {
                         'label': result['server_filename'],
-                        'path': playlist_path(result['path']),
-                        'is_playable': True, 
+                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                        'is_playable': False, 
                         'icon': ThumbPath,
                         }
             else:
                 item = {
                         'label': result['server_filename'],
-                        'path': playlist_path(result['path']),
-                        'is_playable': True,
+                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
+                        'is_playable': False,
                         }
             item_list.append(item)
     return item_list
