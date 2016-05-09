@@ -192,7 +192,8 @@ def directory(path):
 def refresh():
     homemenu = plugin.get_storage('homemenu')
     homemenu.clear()
-    plugin.url_for('main_menu')
+    xbmc.executebuiltin('Container.Refresh')
+#    plugin.url_for('main_menu')
 
 
 @plugin.route('/quality/<filepath>/<cat>')
@@ -201,11 +202,11 @@ def quality(filepath, cat):
     if category == 1:
         items = [{
             'label': u'流畅(推荐)',
-            'path': playlist_path(filepath.decode('utf-8'), stream=True),
+            'path': playlist_path(filepath.decode('utf-8'), stream='M3U8_AUTO_480'),
             'is_playable': True
             },{
             'label': u'高清',
-            'path': playlist_path(filepath.decode('utf-8'), stream=False),
+            'path': playlist_path(filepath.decode('utf-8'), stream='M3U8_AUTO_720'),
             'is_playable': True
             }]
     elif category == 2:
@@ -278,14 +279,14 @@ def playlist_path(pcs_file_path, stream):
     user_tokens = user_info['tokens']
 
     if stream:
-        playlist_data = pcs.get_streaming_playlist(user_cookie, pcs_file_path)
+        playlist_data = pcs.get_streaming_playlist(user_cookie, pcs_file_path, stream)
         if playlist_data:
             raw_dir = os.path.dirname(pcs_file_path)
             m = re.search('\/(.*)', raw_dir)
             dirname = m.group(1)
             basename = os.path.basename(pcs_file_path)
             r = re.search('(.*)\.(.*)$', basename)
-            filename = ''.join([r.group(1),'.m3u8'])
+            filename = ''.join([r.group(1), stream, '.m3u8'])
             dirpath = os.path.join(utils.data_dir(), user_name, dirname)
             if not xbmcvfs.exists(dirpath):
                 xbmcvfs.mkdir(dirpath)
