@@ -7,9 +7,9 @@
 kodi百度云插件，支持在kodi中播放视频和音乐。该插件基于[xbmcswift2](https://github.com/jbeluch/xbmcswift2)框架和[LiuLang/bcloud
 ](https://github.com/LiuLang/bcloud)的授权和PCS接口。
 
-* [xbmcswift2 document](https://xbmcswift2.readthedocs.io/en/latest/)
-* [py2-bcloud](https://github.com/caasiu/bcloud-cl) (bcloud is written by python3)
-* [Crypto](Crypto) is copy and modified from [Legrandin/pycryptodome
+* [xbmcswift2 Document](https://xbmcswift2.readthedocs.io/en/latest/)
+* [py2-bcloud](https://github.com/caasiu/bcloud-cl): bcloud python2.7 rewrite 
+* [Crypto](Crypto): copy and modify from [Legrandin/pycryptodome
 ](https://github.com/Legrandin/pycryptodome)
 
 ## TODO
