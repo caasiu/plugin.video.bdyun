@@ -43,7 +43,7 @@ def main_menu():
         'path': plugin.url_for('search'),
         'is_playable': False
         },{
-        'label': u'## 刷新 (若没有刷新请重新进入插件)',
+        'label': u'## 刷新',
         'path': plugin.url_for('refresh'),
         'is_playable': False
         }]
@@ -67,7 +67,8 @@ def login_dialog():
         cookie,tokens = get_auth.run(username,password)
         if tokens:
             save_user_info(username,password,cookie,tokens)
-            dialog.ok('',u'登录成功',u'如没有自动转跳，请重新进入该插件(第一次请耐心等待)')
+            dialog.ok('',u'登录成功',u'请耐心等待')
+            xbmc.executebuiltin('Container.Refresh')
             return None
     else:
         dialog.ok('Error',u'用户名或密码不能为空')
@@ -193,7 +194,6 @@ def refresh():
     homemenu = plugin.get_storage('homemenu')
     homemenu.clear()
     xbmc.executebuiltin('Container.Refresh')
-#    plugin.url_for('main_menu')
 
 
 @plugin.route('/quality/<filepath>/<cat>')
