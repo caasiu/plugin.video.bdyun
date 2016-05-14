@@ -3,7 +3,7 @@
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json 
 
-from lib.resource import get_auth, pcs, utils
+from lib.resource import get_auth, pcs, utils, cnkeyboard
 from xbmcswift2 import Plugin
 
 plugin = Plugin()
@@ -109,7 +109,7 @@ def search():
     user_info = get_user_info()
     user_cookie = user_info['cookie']
     user_tokens = user_info['tokens']
-    key = dialog.input(u'输入文件名/关键词', type=xbmcgui.INPUT_ALPHANUM)
+    key = cnkeyboard.keyboard(heading=u'输入文件名/关键词')
     if key:
         s = pcs.search(user_cookie, user_tokens, key)
         items = []
