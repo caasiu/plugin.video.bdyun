@@ -115,7 +115,14 @@ def search():
         items = []
         if len(s['list']) == 1:
             for result in s['list']:
-                if result['category'] == 1:
+                if result['isdir'] == 1:
+                    item = {
+                            'label': result['server_filename'],
+                            'path': plugin.url_for('directory', path=result['path'].encode('utf-8')),
+                            'is_playable': False 
+                            }
+                    items.append(item)
+                elif result['category'] == 1:
                     if 'thumbs' in result and 'url2' in result['thumbs']:   
                         ThumbPath = result['thumbs']['url2']
                         item = {
@@ -141,11 +148,18 @@ def search():
             if items:
                 return plugin.finish(items)
             else:
-                dialog.ok('',u'搜素的文件不是视频或音频')
+                dialog.ok('',u'搜素的文件不属于文件夹、视频或音频')
 
         elif s['list']:
             for result in s['list']:
-                if result['category'] == 1:
+                if result['isdir'] == 1:
+                    item = {
+                            'label': result['path'],
+                            'path': plugin.url_for('directory', path=result['path'].encode('utf-8')),
+                            'is_playable': False 
+                            }
+                    items.append(item)
+                elif result['category'] == 1:
                     if 'thumbs' in result and 'url2' in result['thumbs']:   
                         ThumbPath = result['thumbs']['url2']
                         item = {
@@ -171,7 +185,7 @@ def search():
             if items:
                 return plugin.finish(items)
             else:
-                dialog.ok('',u'搜素的文件不是视频或音频')
+                dialog.ok('',u'搜素的文件不属于文件夹、视频或音频')
 
         else:
             dialog.ok('',u'没有找到文件')
