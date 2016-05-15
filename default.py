@@ -3,7 +3,7 @@
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json 
 
-from lib.resource import get_auth, pcs, utils, cnkeyboard
+from lib.resource import get_auth, pcs, utils, cnkeyboard, myplayer
 from xbmcswift2 import Plugin
 
 plugin = Plugin()
@@ -115,7 +115,7 @@ def search():
         items = []
         if len(s['list']) == 1:
             for result in s['list']:
-                if result['category'] == 1 or result['category'] == 2:
+                if result['category'] == 1:
                     if 'thumbs' in result and 'url2' in result['thumbs']:   
                         ThumbPath = result['thumbs']['url2']
                         item = {
@@ -131,6 +131,13 @@ def search():
                                 'is_playable': False, 
                                 }
                     items.append(item)
+                elif result['category'] == 2:
+                    item = {
+                             'label': result['server_filename'],
+                             'path': plugin.url_for('play_music', filepath=result['path'].encode('utf-8')),
+                             'is_playable': False,
+                            }
+                    items.append(item)
             if items:
                 return plugin.finish(items)
             else:
@@ -138,7 +145,7 @@ def search():
 
         elif s['list']:
             for result in s['list']:
-                if result['category'] == 1 or result['category'] == 2:
+                if result['category'] == 1:
                     if 'thumbs' in result and 'url2' in result['thumbs']:   
                         ThumbPath = result['thumbs']['url2']
                         item = {
@@ -153,6 +160,13 @@ def search():
                                 'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
                                 'is_playable': False,
                                 }
+                    items.append(item)
+                elif result['category'] == 2:
+                    item = {
+                             'label': result['path'],
+                             'path': plugin.url_for('play_music', filepath=result['path'].encode('utf-8')),
+                             'is_playable': False,
+                            }
                     items.append(item)
             if items:
                 return plugin.finish(items)
@@ -218,6 +232,16 @@ def quality(filepath, cat):
     return plugin.finish(items)
 
 
+@plugin.route('/play_music/<filepath>')
+def play_music(filepath):
+    url = playlist_path(filepath, stream=False)
+    name = os.path.basename(filepath.decode('utf-8'))
+    listitem = xbmcgui.ListItem(name)
+    listitem.setInfo(type='Music', infoLabels={'Title': name})
+    player = myplayer.Player()
+    player.play(url,listitem,windowed=True)
+
+
 # cache the output of content menu
 def menu_cache(cookie, tokens):
     pcs_files = pcs.list_dir_all(cookie, tokens, path='/')
@@ -253,7 +277,7 @@ def MakeList(pcs_files):
                     'is_playable': False 
                     }
             item_list.append(item)
-        elif result['category'] == 1 or result['category'] == 2:
+        elif result['category'] == 1:
             if 'thumbs' in result and 'url2' in result['thumbs']:   
                 ThumbPath = result['thumbs']['url2']
                 item = {
@@ -268,6 +292,13 @@ def MakeList(pcs_files):
                         'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
                         'is_playable': False,
                         }
+            item_list.append(item)
+        elif result['category'] == 2:
+            item = {
+                    'label': result['server_filename'],
+                    'path': plugin.url_for('play_music', filepath=result['path'].encode('utf-8')),
+                    'is_playable': False,
+                    }
             item_list.append(item)
     return item_list
     
