@@ -120,14 +120,14 @@ def search():
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['server_filename'],
-                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
                                 'is_playable': False, 
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
                                 'label': result['server_filename'],
-                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
                                 'is_playable': False, 
                                 }
                     items.append(item)
@@ -150,14 +150,14 @@ def search():
                         ThumbPath = result['thumbs']['url2']
                         item = {
                                 'label': result['path'],
-                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
                                 'is_playable': False, 
                                 'icon': ThumbPath,
                                 }
                     else:
                         item = {
                                 'label': result['path'],
-                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
+                                'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
                                 'is_playable': False,
                                 }
                     items.append(item)
@@ -210,26 +210,30 @@ def refresh():
     xbmc.executebuiltin('Container.Refresh')
 
 
-@plugin.route('/quality/<filepath>/<cat>')
-def quality(filepath, cat):
-    category = int(cat)
-    if category == 1:
-        items = [{
-            'label': u'流畅(推荐)',
-            'path': playlist_path(filepath.decode('utf-8'), stream='M3U8_AUTO_480'),
-            'is_playable': True
-            },{
-            'label': u'高清',
-            'path': playlist_path(filepath.decode('utf-8'), stream='M3U8_AUTO_720'),
-            'is_playable': True
-            }]
-    elif category == 2:
-        items = [{
-            'label': u'播放',
-            'path': playlist_path(filepath.decode('utf-8'), stream=False),
-            'is_playable': True
-            }]
-    return plugin.finish(items)
+@plugin.route('/quality/<filepath>')
+def quality(filepath):
+    stream_type = ['M3U8_AUTO_480','M3U8_AUTO_720']
+    choice = dialog.select(u'请选择画质', [u'流畅480P(推荐)',u'高清720P',u'原画(不转码)'])
+    if choice < 0:
+        return
+
+    elif choice == 0 or choice == 1:
+        stream = stream_type[choice]
+        video_path = playlist_path(filepath.decode('utf-8'), stream)
+
+    elif choice == 2:
+        rep = dialog.yesno(u'注意',u'原画没有经过转码,需要很高的带宽',u'继续使用原画吗？')
+        if rep:
+            video_path = playlist_path(filepath, stream=False)
+        else:
+            return
+
+    name = os.path.basename(filepath.decode('utf-8'))
+    listitem = xbmcgui.ListItem(name)
+    listitem.setInfo(type='Video', infoLabels={'Title': name})
+
+    player = myplayer.Player()
+    player.play(video_path, listitem, windowed=False)
 
 
 @plugin.route('/play_music/<filepath>')
@@ -282,14 +286,14 @@ def MakeList(pcs_files):
                 ThumbPath = result['thumbs']['url2']
                 item = {
                         'label': result['server_filename'],
-                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
+                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
                         'is_playable': False, 
                         'icon': ThumbPath,
                         }
             else:
                 item = {
                         'label': result['server_filename'],
-                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8'), cat=str(result['category'])),
+                        'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
                         'is_playable': False,
                         }
             item_list.append(item)
