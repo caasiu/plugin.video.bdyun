@@ -39,7 +39,7 @@ def main_menu():
         'is_playable': False,
         'icon': avatar_url
         },{
-        'label': u'## 搜索视频或音频',
+        'label': u'## 搜索文件(文件夹/视频/音乐)',
         'path': plugin.url_for('search'),
         'is_playable': False
         },{
@@ -83,13 +83,19 @@ def accout_setting():
     'path': plugin.url_for('clear_cache'),
     'is_playable': False
     },{
-    'label': 'setting',
+    'label': u'插件设置',
+    'path': plugin.url_for('setting'),
     'is_playable': False
     }]
     if user_info:
         return plugin.finish(items)
     else:
         return
+
+
+@plugin.route('/setting/')
+def setting():
+    plugin.open_settings()
 
 
 @plugin.route('/accout_setting/clear_cache/')
@@ -158,7 +164,7 @@ def search():
                             'path': plugin.url_for('directory', path=result['path'].encode('utf-8')),
                             'is_playable': False 
                             }
-                    items.append(item)
+                    items.insert(0, item)
                 elif result['category'] == 1:
                     if 'thumbs' in result and 'url2' in result['thumbs']:   
                         ThumbPath = result['thumbs']['url2']
@@ -226,21 +232,17 @@ def refresh():
 
 @plugin.route('/quality/<filepath>')
 def quality(filepath):
-    stream_type = ['M3U8_AUTO_480','M3U8_AUTO_720']
-    choice = dialog.select(u'请选择画质', [u'流畅480P(推荐)',u'高清720P',u'原画(不转码)'])
-    if choice < 0:
-        return
-
-    elif choice == 0 or choice == 1:
-        stream = stream_type[choice]
-        video_path = playlist_path(filepath.decode('utf-8'), stream)
-
-    elif choice == 2:
-        rep = dialog.yesno(u'注意',u'原画没有经过转码,需要很高的带宽',u'继续使用原画吗？')
-        if rep:
-            video_path = playlist_path(filepath, stream=False)
-        else:
+    if plugin.get_setting('show_stream_type', bool):
+        stream_type = ['M3U8_AUTO_480','M3U8_AUTO_720']
+        choice = dialog.select(u'请选择画质', [u'流畅480P(推荐)',u'高清720P'])
+        if choice < 0:
             return
+        elif choice == 0 or choice == 1:
+            stream = stream_type[choice]
+    else:
+        stream = plugin.get_setting('stream_type', str)
+
+    video_path = playlist_path(filepath.decode('utf-8'), stream)
 
     name = os.path.basename(filepath.decode('utf-8'))
     listitem = xbmcgui.ListItem(name)
