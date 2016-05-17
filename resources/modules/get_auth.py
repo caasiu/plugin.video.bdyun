@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json 
-from lib.resource import auth
+from resources.modules import auth
 
 dialog = xbmcgui.Dialog()
 

@@ -9,7 +9,7 @@ import time, json, base64, re, random, urlparse, os
 import requests
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_v1_5
-from lib.resource import utils
+from resources.modules import utils
 
 
 #some base url and information needed by service

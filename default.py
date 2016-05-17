@@ -3,7 +3,7 @@
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json 
 
-from lib.resource import get_auth, pcs, utils, cnkeyboard, myplayer
+from resources.modules import get_auth, pcs, utils, cnkeyboard, myplayer
 from xbmcswift2 import Plugin
 
 plugin = Plugin()
