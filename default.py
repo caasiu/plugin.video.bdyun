@@ -4,7 +4,7 @@ import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json 
 
 from resources.modules import get_auth, pcs, utils, cnkeyboard, myplayer
-from xbmcswift2 import Plugin
+from xbmcswift2 import Plugin, actions
 
 plugin = Plugin()
 dialog = xbmcgui.Dialog()
@@ -30,7 +30,7 @@ def main_menu():
                 avatar_url = pcs_info['avatar_url']
             else:
                 avatar_url = ''
-                dialog.ok('Error',u'请重新登录',u'点击当前帐号，再点击登出')
+                dialog.ok('Error', u'授权已过期,请重新登录')
         else:
             avatar_url = PcsInfo['avatar_url']
         items = [{
@@ -55,6 +55,8 @@ def main_menu():
             else:
                 item_list = menu_cache(user_info['cookie'], user_info['tokens'])
             items.extend(item_list)
+        else:
+            items.extend([{'label': u'重新登录', 'path': plugin.url_for('login_dialog')}])
 
     return plugin.finish(items, update_listing=True)
 
@@ -67,9 +69,11 @@ def login_dialog():
         cookie,tokens = get_auth.run(username,password)
         if tokens:
             save_user_info(username,password,cookie,tokens)
-            dialog.ok('',u'登录成功',u'请耐心等待')
-            xbmc.executebuiltin('Container.Refresh')
-            return None
+            homemenu = plugin.get_storage('homemenu')
+            homemenu.clear()
+            dialog.ok('',u'登录成功', u'点击返回首页并耐心等待')
+            items = [{'label': u'<< 返回首页', 'path': plugin.url_for('main_menu')}]
+            return plugin.finish(items, update_listing=True)
     else:
         dialog.ok('Error',u'用户名或密码不能为空')
     return None
@@ -81,6 +85,10 @@ def accout_setting():
     items = [{
     'label': u'登出和清除缓存',
     'path': plugin.url_for('clear_cache'),
+    'is_playable': False
+    },{
+    'label': u'重新登录',
+    'path': plugin.url_for('login_dialog'),
     'is_playable': False
     },{
     'label': u'插件设置',
@@ -106,7 +114,8 @@ def clear_cache():
     info.clear()
     homemenu.clear()
     pcs_info.clear()
-    dialog.ok('',u'清理完毕')
+    dialog.notification('', u'清除完毕', xbmcgui.NOTIFICATION_INFO, 3000)
+    xbmc.executebuiltin('Container.Refresh')
     return
 
 
@@ -265,7 +274,10 @@ def play_music(filepath):
 # cache the output of content menu
 def menu_cache(cookie, tokens):
     pcs_files = pcs.list_dir_all(cookie, tokens, path='/')
-    item_list = MakeList(pcs_files)
+    if pcs_files:
+        item_list = MakeList(pcs_files)
+    else:
+        return [{'label': u'请点击一下「刷新」', 'path': ''}]
     homemenu = plugin.get_storage('homemenu', TTL=60)
     homemenu['item_list'] = item_list
     return item_list
@@ -289,12 +301,18 @@ def save_user_info(username, password, cookie, tokens):
 
 def MakeList(pcs_files):
     item_list = []
+    ContextMenu = [
+            ('搜索', actions.background(plugin.url_for('search'))),
+            ('刷新', actions.background(plugin.url_for('refresh'))),
+            ('登出', actions.background(plugin.url_for('clear_cache'))),
+            ]
     for result in pcs_files:
         if result['isdir'] == 1:
             item = {
                     'label': result['server_filename'],
                     'path': plugin.url_for('directory', path=result['path'].encode('utf-8')),
-                    'is_playable': False 
+                    'is_playable': False,
+                    'context_menu': ContextMenu,
                     }
             item_list.append(item)
         elif result['category'] == 1:
@@ -305,12 +323,14 @@ def MakeList(pcs_files):
                         'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
                         'is_playable': False, 
                         'icon': ThumbPath,
+                        'context_menu': ContextMenu,
                         }
             else:
                 item = {
                         'label': result['server_filename'],
                         'path': plugin.url_for('quality', filepath=result['path'].encode('utf-8')),
                         'is_playable': False,
+                        'context_menu': ContextMenu,
                         }
             item_list.append(item)
         elif result['category'] == 2:
@@ -318,6 +338,7 @@ def MakeList(pcs_files):
                     'label': result['server_filename'],
                     'path': plugin.url_for('play_music', filepath=result['path'].encode('utf-8')),
                     'is_playable': False,
+                    'context_menu': ContextMenu,
                     }
             item_list.append(item)
     return item_list
