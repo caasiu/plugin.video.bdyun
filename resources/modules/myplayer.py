@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
-import time
-import xbmc
+'''该模块用于kodi播放视频/音频'''
+import time, xbmc
 
 
 class Player(xbmc.Player):
@@ -13,7 +13,7 @@ class Player(xbmc.Player):
 
         self._start_time = time.time()
         while True:
-            # print self._start_time, time.time()
+            # 两个串流文件播放间隔是5分钟，如果用户强行停止kodi将进入静默状态
             if self._stopped or time.time() - self._start_time > 300:
                 if self._totalTime == 999999:
                     raise PlaybackFailed(
