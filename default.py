@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+'''Author is caasiu <caasiu@outlook.com> && source code is under GPLv3'''
+
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json 
 

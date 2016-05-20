@@ -1,23 +1,38 @@
-# plugin.video.bdyun(Dev)
+# plugin.video.bdyun
 ![kodi v15+](https://img.shields.io/badge/kodi-v15.2+-brightgreen.svg)
-![platform](https://img.shields.io/badge/Platform-ALL-yellow.svg)
-![bc version](https://img.shields.io/badge/Version-0.6.6-red.svg)
+![platform](https://img.shields.io/badge/Platform-Win/Unix-orange.svg)
 ![license](https://img.shields.io/badge/License-GPLv3-blue.svg)
 
 kodi百度云插件，支持在kodi中播放视频和音乐。该插件基于[xbmcswift2](https://github.com/jbeluch/xbmcswift2)框架和[LiuLang/bcloud
 ](https://github.com/LiuLang/bcloud)的授权和PCS接口。
 
-* [xbmcswift2 Document](https://xbmcswift2.readthedocs.io/en/latest/)
-* [py2-bcloud](https://github.com/caasiu/bcloud-cl): bcloud python2.7 rewrite 
-* [Crypto](Crypto): copy and modify from [Legrandin/pycryptodome
-](https://github.com/Legrandin/pycryptodome)
+* 该插件运行在[kodi 15](https://kodi.tv)及以上版本
+* 插件只会显示你百度云中的文件夹、视频、音频
+* 视频播放时可以选择480P/720P两种格式
+* 该插件只有播放功能，其他操作请在客户端进行
+* 插件增加了搜索和刷新功能
 
-## TODO
-* ~~解决插件播放视频(m3u8文件)的时候不能快进问题~~
+## 安装
+* 点击[这里](https://github.com/caasiu/plugin.video.bdyun/archive/master.zip)下载安装包plugin.video.bdyun.zip
+* 点击[这里](https://github.com/taxigps/script.module.keyboard.chinese/archive/master.zip)下载Kodi中文拼音输入法依赖（不安装搜索时无法输入中文）
+1. 打开Kodi
+2. 进入系统 | 设定 | 插件
+3. 选择从zip中安装
+4. 选取刚才下载的zip
+5. 选择确定
+6. 返回首页进入视频|插件|百度云盘
 
- 快进/快退不能点击时间进度条，只能通过快进/快退按钮进行操作
-* 解决播放音乐卡顿的问题(已知音乐文件的下载地址)
-* :email: Email: [caasiu@outlook.com](mailto:caasiu@outlook.com)
+## 截图
+[screenshot](screenshot.png)
+
+## 已知问题
+* 播放音乐时会有卡顿
+* 播放错了视频后不能马上切换？
+> kodi默认播放两个串流视频之间的时间间隔为5分钟...
+
+若有解决方法或者遇到错误，请发送邮件给我。
+
+:email: Email: [caasiu@outlook.com](mailto:caasiu@outlook.com)
 
 ## License
 * plugin.video.bdyun is released under the GPLv3 License. See [LICENSE](LICENSE) for details.
