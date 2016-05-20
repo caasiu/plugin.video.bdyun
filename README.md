@@ -15,6 +15,7 @@ kodi百度云插件，支持在kodi中播放视频和音乐。该插件基于[xb
 ## 安装
 * 点击[这里](https://github.com/caasiu/plugin.video.bdyun/archive/master.zip)下载安装包plugin.video.bdyun.zip
 * 点击[这里](https://github.com/taxigps/script.module.keyboard.chinese/archive/master.zip)下载Kodi中文拼音输入法依赖（不安装搜索时无法输入中文）
+
 1. 打开Kodi
 2. 进入系统 | 设定 | 插件
 3. 选择从zip中安装
@@ -23,7 +24,7 @@ kodi百度云插件，支持在kodi中播放视频和音乐。该插件基于[xb
 6. 返回首页进入视频|插件|百度云盘
 
 ## 截图
-[screenshot](screenshot.png)
+![screenshot](screenshot.png)
 
 ## 已知问题
 * 播放音乐时会有卡顿
