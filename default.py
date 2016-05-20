@@ -34,7 +34,7 @@ def main_menu():
         else:
             avatar_url = PcsInfo['avatar_url']
         items = [{
-        'label': u'## 当前帐号: %s' %user_info['username'],
+        'label': u'## 管理当前帐号: %s' %user_info['username'],
         'path': plugin.url_for('accout_setting'),
         'is_playable': False,
         'icon': avatar_url
@@ -56,12 +56,13 @@ def main_menu():
                 item_list = menu_cache(user_info['cookie'], user_info['tokens'])
             items.extend(item_list)
         else:
-            items.extend([{'label': u'重新登录', 'path': plugin.url_for('login_dialog')}])
+            items.extend([{'label': u'重新登录', 'path': plugin.url_for('relogin')}])
 
     return plugin.finish(items, update_listing=True)
 
 
 @plugin.route('/login_dialog/')
+@plugin.route('/login_dialog/', name='relogin')
 def login_dialog():
     username = dialog.input(u'用户名:', type=xbmcgui.INPUT_ALPHANUM)
     password = dialog.input(u'密码:', type=xbmcgui.INPUT_ALPHANUM, option=xbmcgui.ALPHANUM_HIDE_INPUT)
@@ -83,12 +84,15 @@ def login_dialog():
 def accout_setting():
     user_info = get_user_info()
     items = [{
+    'label': u'<< 返回首页',
+    'path': plugin.url_for('main_menu')
+    },{
     'label': u'登出和清除缓存',
     'path': plugin.url_for('clear_cache'),
     'is_playable': False
     },{
-    'label': u'重新登录',
-    'path': plugin.url_for('login_dialog'),
+    'label': u'重新登录/切换帐号',
+    'path': plugin.url_for('relogin'),
     'is_playable': False
     },{
     'label': u'插件设置',
@@ -96,7 +100,7 @@ def accout_setting():
     'is_playable': False
     }]
     if user_info:
-        return plugin.finish(items)
+        return plugin.finish(items, update_listing=True)
     else:
         return
 
@@ -220,15 +224,19 @@ def directory(path):
     previous_path = os.path.dirname(path)
     if previous_path == '/':
         item_list.insert(0,{
-                'label': u'返回首页',
+                'label': u'<< 返回首页',
                 'path': plugin.url_for('main_menu')
             })
     else:
         item_list.insert(0,{
-                'label': u'<< 返回上一层',
+                'label': u'<< 返回上一目录',
                 'path': plugin.url_for('directory', path=previous_path),
             })
 
+    item_list.insert(0,{
+                'label': u'## 当前目录: %s' %path.decode('utf-8'), 
+                'path': plugin.url_for('refresh')
+            })
     return plugin.finish(item_list, update_listing=True)
 
 
@@ -277,7 +285,7 @@ def menu_cache(cookie, tokens):
     if pcs_files:
         item_list = MakeList(pcs_files)
     else:
-        return [{'label': u'请点击一下「刷新」', 'path': ''}]
+        return [{'label': u'请点击一下「刷新」', 'path': plugin.url_for('refresh')}]
     homemenu = plugin.get_storage('homemenu', TTL=60)
     homemenu['item_list'] = item_list
     return item_list
