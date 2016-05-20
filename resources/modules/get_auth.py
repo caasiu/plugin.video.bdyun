@@ -9,8 +9,8 @@ dialog = xbmcgui.Dialog()
 
 class VcodeWindow(xbmcgui.WindowDialog):
     def __init__(self, vcode_path):
-        self.image = xbmcgui.ControlImage(80,100,300,120,vcode_path)
-        self.button = xbmcgui.ControlButton(100,250,150,40,label=u'输入验证码',textColor='0xFFFFFFFF')
+        self.image = xbmcgui.ControlImage(80, 100, 500, 200, vcode_path)
+        self.button = xbmcgui.ControlButton(100, 330, 140, 50, label=u'输入验证码', font='font20', textColor='0xFFFFFFFF')
         self.addControl(self.image)
         self.addControl(self.button)
         self.setFocus(self.button)
