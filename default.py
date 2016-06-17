@@ -382,7 +382,7 @@ def playlist_path(pcs_file_path, stream):
             basename = os.path.basename(pcs_file_path)
             r = re.search('(.*)\.(.*)$', basename)
             filename = ''.join([r.group(1), stream, '.m3u8'])
-            dirpath = os.path.join(utils.data_dir(), user_name, unicode(dirname, 'utf-8'))
+            dirpath = os.path.join(utils.data_dir(), user_name, dirname)
             if not xbmcvfs.exists(dirpath):
                 xbmcvfs.mkdirs(dirpath)
             filepath = os.path.join(dirpath, filename)
