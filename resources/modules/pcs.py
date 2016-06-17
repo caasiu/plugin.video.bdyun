@@ -220,7 +220,7 @@ def get_streaming_playlist(cookie, path, video_type='M3U8_AUTO_480'):
     ])
     headers_merged = default_headers.copy()
     req = requests.get(url, cookies=cookie, headers=headers_merged)
-    if req:
+    if req.status_code == 200:
         return req.text
     else:
         return None
