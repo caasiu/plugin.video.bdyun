@@ -271,8 +271,9 @@ def quality(filepath):
     listitem = xbmcgui.ListItem(name)
     listitem.setInfo(type='Video', infoLabels={'Title': name})
 
-    player = myplayer.Player()
-    player.play(video_path, listitem, windowed=False)
+    if video_path:
+        player = myplayer.Player()
+        player.play(video_path, listitem, windowed=False)
 
 
 @plugin.route('/play_music/<filepath>')
@@ -281,8 +282,10 @@ def play_music(filepath):
     name = os.path.basename(filepath)
     listitem = xbmcgui.ListItem(name)
     listitem.setInfo(type='Music', infoLabels={'Title': name})
-    player = myplayer.Player()
-    player.play(url,listitem,windowed=True)
+
+    if url:
+        player = myplayer.Player()
+        player.play(url,listitem,windowed=True)
 
 
 # cache the output of content menu
@@ -381,6 +384,7 @@ def playlist_path(pcs_file_path, stream):
                 f.write(playlist_data)
             return filepath
         else:
+            dialog.notification('', u'无法打开视频,请尝试其他清晰度', xbmcgui.NOTIFICATION_INFO, 6000)
             return None
     else:
         url = pcs.get_download_link(user_cookie, user_tokens, pcs_file_path)
