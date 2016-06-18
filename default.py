@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 '''Author is caasiu <caasiu@outlook.com> && source code is under GPLv3'''
 
+
 import xbmc, xbmcgui, xbmcaddon, xbmcvfs
 import os, sys, re, json
 
@@ -221,13 +222,15 @@ def search():
 
 @plugin.route('/directory/<path>')
 def directory(path):
+    if isinstance(path, str):
+        path = path.decode('utf-8')
     user_info = get_user_info()
     user_cookie = user_info['cookie']
     user_tokens = user_info['tokens']
-    dir_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path.decode('utf-8'))
+    dir_files = pcs.list_dir_all(user_info['cookie'], user_info['tokens'], path)
     item_list = MakeList(dir_files)
 
-    previous_path = os.path.dirname(path)
+    previous_path = os.path.dirname(path).encode('utf-8')
     if previous_path == '/':
         item_list.insert(0,{
                 'label': u'<< 返回首页',
@@ -240,7 +243,7 @@ def directory(path):
             })
 
     item_list.insert(0,{
-                'label': u'## 当前目录: %s' %path.decode('utf-8'),
+                'label': u'## 当前目录: %s' % path,
                 'path': plugin.url_for('refresh')
             })
     return plugin.finish(item_list, update_listing=True)
@@ -264,7 +267,8 @@ def quality(filepath):
             stream = stream_type[choice]
     else:
         stream = plugin.get_setting('stream_type', str)
-
+    if isinstance(filepath, str):
+        filepath = filepath.decode('utf-8')
     video_path = playlist_path(filepath, stream)
 
     name = os.path.basename(filepath)
@@ -278,6 +282,8 @@ def quality(filepath):
 
 @plugin.route('/play_music/<filepath>')
 def play_music(filepath):
+    if isinstance(filepath, str):
+        filepath = filepath.decode('utf-8')
     url = playlist_path(filepath, stream=False)
     name = os.path.basename(filepath)
     listitem = xbmcgui.ListItem(name)
@@ -319,10 +325,10 @@ def save_user_info(username, password, cookie, tokens):
 def MakeList(pcs_files):
     item_list = []
     ContextMenu = [
-            ('搜索', actions.background(plugin.url_for('search'))),
-            ('刷新', actions.background(plugin.url_for('refresh'))),
-            ('登出', actions.background(plugin.url_for('clear_cache'))),
-            ]
+        ('搜索', actions.background(plugin.url_for('search'))),
+        ('刷新', actions.background(plugin.url_for('refresh'))),
+        ('登出', actions.background(plugin.url_for('clear_cache'))),
+    ]
     for result in pcs_files:
         if result['isdir'] == 1:
             item = {
@@ -376,12 +382,12 @@ def playlist_path(pcs_file_path, stream):
             basename = os.path.basename(pcs_file_path)
             r = re.search('(.*)\.(.*)$', basename)
             filename = ''.join([r.group(1), stream, '.m3u8'])
-            dirpath = os.path.join(utils.data_dir(), user_name, unicode(dirname, 'utf-8'))
+            dirpath = os.path.join(utils.data_dir(), user_name, dirname)
             if not xbmcvfs.exists(dirpath):
                 xbmcvfs.mkdirs(dirpath)
-            filepath = os.path.join(dirpath, unicode(filename, 'utf-8'))
-            with open(filepath, 'w') as f:
-                f.write(playlist_data)
+            filepath = os.path.join(dirpath, filename)
+            tmpFile = xbmcvfs.File(filepath, 'w')
+            tmpFile.write(bytearray(playlist_data, 'utf-8'))
             return filepath
         else:
             dialog.notification('', u'无法打开视频,请尝试其他清晰度', xbmcgui.NOTIFICATION_INFO, 6000)
