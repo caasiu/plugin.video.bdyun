@@ -7,8 +7,7 @@
 
 import time, json, base64, re, random, urlparse, os
 import requests
-from Crypto.PublicKey import RSA
-from Crypto.Cipher import PKCS1_v1_5
+import rsa
 from resources.modules import utils
 
 
@@ -41,9 +40,8 @@ def json_loads_single(s):
 
 
 def RSA_encrypt(public_key, message):
-    rsakey = RSA.importKey(public_key)
-    rsakey = PKCS1_v1_5.new(rsakey)
-    encrypted = rsakey.encrypt(message.encode('utf-8'))
+    rsakey = rsa.PublicKey.load_pkcs1_openssl_pem(public_key)
+    encrypted = rsa.encrypt(message.encode('utf-8'), rsakey)
     return base64.encodestring(encrypted).decode('utf-8').replace('\n', '')
 
 
