@@ -263,16 +263,22 @@ def refresh():
 @plugin.route('/quality/<filepath>')
 def quality(filepath):
     if plugin.get_setting('show_stream_type', bool):
-        stream_type = ['M3U8_AUTO_480','M3U8_AUTO_720']
-        choice = dialog.select(u'请选择画质', [u'流畅480P(推荐)',u'高清720P'])
+        stream_type = ['M3U8_AUTO_720', 'NONE']
+        choice = dialog.select(u'请选择画质', [u'流畅',u'原画'])
         if choice < 0:
             return
-        elif choice == 0 or choice == 1:
+        elif choice == 0:
             stream = stream_type[choice]
+        elif choice == 1:
+            stream = False
+    elif plugin.get_setting('stream_type', str) == 'NONE':
+        stream = False
     else:
         stream = plugin.get_setting('stream_type', str)
+
     if isinstance(filepath, str):
         filepath = filepath.decode('utf-8')
+
     video_path = playlist_path(filepath, stream)
 
     name = os.path.basename(filepath)
@@ -397,7 +403,7 @@ def playlist_path(pcs_file_path, stream):
             dialog.notification('', u'无法打开视频,请尝试其他清晰度', xbmcgui.NOTIFICATION_INFO, 6000)
             return None
     else:
-        url = pcs.get_download_link(user_cookie, user_tokens, pcs_file_path)
+        url = pcs.stream_download(user_cookie, user_tokens, pcs_file_path)
         return url
 
 

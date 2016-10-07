@@ -197,9 +197,11 @@ def stream_download(cookie, tokens, path):
         '&path=', path,
         '&app_id=250528',
     ])
-    req = requests.get(url, cookies=cookie, allow_redirects=False, timeout=50, verify=False)
+    headers_merged = default_headers.copy()
+    headers_merged.update({'Accept': ACCEPT_HTML})
+    req = requests.get(url, headers=headers_merged, cookies=cookie, allow_redirects=False, timeout=50, verify=False)
     if req:
-        return req
+        return req.headers['location']
     else:
         return None
 
