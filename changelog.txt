@@ -1,3 +1,7 @@
+V0.1.8 2016-10-09
+-增加播放原画功能
+-Add playing native resolution video
+
 V0.1.6 2016-09-18
 -修复中文验证码输入问题
 -Fix input Chinese verifycode issue

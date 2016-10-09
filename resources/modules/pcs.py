@@ -16,9 +16,9 @@ latency = str(random.random())
 CONTENT_FORM = 'application/x-www-form-urlencoded'
 CONTENT_FORM_UTF8 = CONTENT_FORM + '; charset=UTF-8'
 # 一般的服务器名
-PCS_URL = 'http://pcs.baidu.com/rest/2.0/pcs/'
+PCS_URL = 'https://pcs.baidu.com/rest/2.0/pcs/'
 # 下载的服务器名
-PCS_URL_D = 'http://d.pcs.baidu.com/rest/2.0/pcs/'
+PCS_URL_D = 'https://d.pcs.baidu.com/rest/2.0/pcs/'
 ## HTTP 请求时的一些常量
 ACCEPT_HTML = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
 
