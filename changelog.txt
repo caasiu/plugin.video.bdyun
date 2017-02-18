@@ -1,3 +1,7 @@
+V0.1.11 2017-02-18
+-修复kodi17登录验证码输入问题
+-fix validation code input issue on kodi 17
+
 V0.1.8 2016-10-09
 -增加播放原画功能
 -Add playing native resolution video
