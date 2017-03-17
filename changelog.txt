@@ -1,3 +1,6 @@
+V0.1.13 2017-03-17
+-fix login issue again(dv)
+
 V0.1.12 2017-03-05
 -修复登录问题
 -fix login issue
