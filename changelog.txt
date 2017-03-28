@@ -1,3 +1,6 @@
+V0.1.14 2017-03-28
+-use kodi default player to play music
+
 V0.1.13 2017-03-17
 -fix login issue again(dv)
 
