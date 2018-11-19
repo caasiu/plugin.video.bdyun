@@ -58,7 +58,7 @@ def main_menu():
                     break
             else:
                 cookie,tokens = get_auth.run(user_info['username'], user_info['password'])
-                if tokens['bdstoken']:
+                if tokens and tokens['bdstoken']:
                     save_user_info(user_info['username'], user_info['password'], cookie, tokens)
                 else:
                     items.extend([{'label': u'重新登录', 'path': plugin.url_for('relogin')}])
@@ -331,6 +331,8 @@ def save_user_info(username, password, cookie, tokens):
 
 def MakeList(pcs_files):
     item_list = []
+    item_list_dir = []
+    item_list_file = []
     ContextMenu = [
         ('搜索', actions.background(plugin.url_for('search'))),
         ('刷新', actions.background(plugin.url_for('refresh'))),
@@ -344,7 +346,7 @@ def MakeList(pcs_files):
                     'is_playable': False,
                     'context_menu': ContextMenu,
                     }
-            item_list.append(item)
+            item_list_dir.append(item)
         elif result['category'] == 1:
             if 'thumbs' in result and 'url2' in result['thumbs']:
                 ThumbPath = result['thumbs']['url2']
@@ -362,7 +364,7 @@ def MakeList(pcs_files):
                         'is_playable': False,
                         'context_menu': ContextMenu,
                         }
-            item_list.append(item)
+            item_list_file.append(item)
         elif result['category'] == 2:
             item = {
                     'label': result['server_filename'],
@@ -370,7 +372,9 @@ def MakeList(pcs_files):
                     'is_playable': False,
                     'context_menu': ContextMenu,
                     }
-            item_list.append(item)
+            item_list_file.append(item)
+        item_list_file=sorted(item_list_file,key=lambda item:item['label'])
+        item_list=item_list_dir+item_list_file
     return item_list
 
 

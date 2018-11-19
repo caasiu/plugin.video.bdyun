@@ -54,7 +54,7 @@ def run(username,password):
     pubkey = key_data['pubkey']
     rsakey = key_data['key']
     password_enc = auth.RSA_encrypt(pubkey, password)
-    err_no,query = auth.post_login(cookie,tokens,username,password_enc,rsakey)
+    err_no,query,authCookie = auth.post_login(cookie,tokens,username,password_enc,rsakey)
     if err_no == 257:
         vcodetype = query['vcodetype']
         codeString = query['codeString']
@@ -66,9 +66,10 @@ def run(username,password):
 
         verifycode = dialog.input(heading=u'验证码')
         if verifycode:
-            err_no,query = auth.post_login(cookie,tokens,username,password_enc,rsakey,verifycode,codeString)
+            err_no,query,authCookie = auth.post_login(cookie,tokens,username,password_enc,rsakey,verifycode,codeString)
+
             if err_no == 0:
-                temp_cookie = query
+                temp_cookie = authCookie
                 auth_cookie, bdstoken = auth.get_bdstoken(temp_cookie)
                 if bdstoken:
                     tokens['bdstoken'] = bdstoken
@@ -80,8 +81,28 @@ def run(username,password):
             elif err_no == 6:
                 dialog.ok('Error',u'验证码错误')
 
+            elif err_no == 120021:
+                dialog.ok('Info',u'发送电邮验证')
+                #send email verification
+                authToken = query['authtoken']
+                loginProxyUrl = query['loginproxy']
+
+                sndResp = auth.send_email_verfication(authToken)
+                if sndResp.ok:
+                    emailVerifyCode = dialog.input(heading=u'电邮验证码')
+                    temp_cookie = auth.send_email_verification_code(authToken, emailVerifyCode,loginProxyUrl,cookie)
+                    if temp_cookie:
+
+                        auth_cookie, bdstoken = auth.get_bdstoken(temp_cookie)
+                        if bdstoken:
+                            tokens['bdstoken'] = bdstoken
+                            return auth_cookie,tokens
+
+                # failure status
+                dialog.ok('Error', u'未知错误，请重试')
             else:
                 dialog.ok('Error',u'未知错误，请重试')
+
         else:
             dialog.ok('Error',u'请输入验证码')
     
@@ -89,7 +110,7 @@ def run(username,password):
         dialog.ok('Error',u'密码错误')
 
     elif err_no == 0:
-        auth_cookie = query
+        auth_cookie = authCookie
         bdstoken = auth.get_bdstoken(auth_cookie)
         if bdstoken:
             tokens['bdstoken'] = bdstoken
