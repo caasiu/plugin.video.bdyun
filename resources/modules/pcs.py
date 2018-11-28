@@ -47,10 +47,8 @@ def get_quota(cookie, tokens):
             }
     headers_merged = default_headers.copy()
     headers_merged.update({'User-agent': 'netdisk;4.6.2.0;PC;PC-Windows;10.0.10240;WindowsBaiduYunGuanJia'})
-    print('!!!',cookie, '\n', headers_merged, '\n', params)
     req = requests.get(url, params=params, cookies=cookie, headers=headers_merged, timeout=50, verify=False)
     if req:
-        print("req.headers: ", req.headers)
         return req.json()
     else:
         return None
@@ -59,7 +57,6 @@ def get_quota(cookie, tokens):
 def token_validation(cookie, tokens):
     '使用百度云容量接口检测token的有效性'
     quota = get_quota(cookie, tokens)
-    print('quota: ', quota)
     if quota['errno'] == 0:
         return True
     else:
@@ -78,7 +75,6 @@ def list_dir_all(cookie, tokens, path):
     page = 1
     while True:
         content = list_dir(cookie, tokens, path, page)
-        print('!!!list_dir_all:', content)
         if not content:
             return None
         if not content['list']:
