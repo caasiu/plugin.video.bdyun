@@ -39,9 +39,15 @@ default_headers = {
 
 def get_quota(cookie, tokens):
     '百度云用户容量接口'
-    url = 'http://yun.baidu.com/api/quota?bdstoken=' + tokens['bdstoken']
+    url = 'http://pan.baidu.com/api/quota'
+    params={'method': None,
+            'BDUSS': cookie['BDUSS'],
+            't': str(int(time.time()*1000)),
+            'bdstoken': tokens['bdstoken']
+            }
     headers_merged = default_headers.copy()
-    req = requests.get(url, cookies=cookie, headers=headers_merged, timeout=50, verify=False)
+    headers_merged.update({'User-agent': 'netdisk;4.6.2.0;PC;PC-Windows;10.0.10240;WindowsBaiduYunGuanJia'})
+    req = requests.get(url, params=params, cookies=cookie, headers=headers_merged, timeout=50, verify=False)
     if req:
         return req.json()
     else:
@@ -91,6 +97,7 @@ def list_dir(cookie, tokens, path, page=1, num=100):
             'dir': path,
             't': str(random.random()),
             'bdstoken': tokens['bdstoken'],
+            'BDUSS': cookie['BDUSS'],
             'channel': 'chunlei',
             'app_id': '250528',
             'clienttype': '0',
@@ -98,6 +105,7 @@ def list_dir(cookie, tokens, path, page=1, num=100):
 
     headers_merged = default_headers.copy()
     headers_merged.update({'Content-type': CONTENT_FORM_UTF8})
+    headers_merged.update({'User-agent': 'netdisk;4.6.2.0;PC;PC-Windows;10.0.10240;WindowsBaiduYunGuanJia'})
 
     req = requests.get(url, headers=headers_merged, cookies=cookie, params=url_params, timeout=50, verify=False)
     if req:
@@ -163,12 +171,24 @@ def get_download_link(cookie, tokens, path):
     else:
         return req.headers['location']
 
+def get_fastest_pcs_server():
+	"""通过百度返回设置最快的pcs服务器
+	"""
+	url = 'http://pcs.baidu.com/rest/2.0/pcs/file?app_id=250528&method=locateupload'
+	ret = requests.get(url).content
+	foo = json.loads(ret.decode('utf-8'))
+	return foo['host']
 
 def stream_download(cookie, tokens, path):
     '''下载流媒体文件.
 
     path - 流文件的绝对路径.
     '''
+    fastServer = get_fastest_pcs_server()
+    if fastServer:
+	global PCS_URL_D
+	PCS_URL_D = 'https://{0}/rest/2.0/pcs/'.format(fastServer)
+
     url = ''.join([
         PCS_URL_D,
         'file?method=download',
