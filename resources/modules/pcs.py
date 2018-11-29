@@ -185,7 +185,7 @@ def stream_download(cookie, tokens, path):
     path - 流文件的绝对路径.
     '''
     fastServer = get_fastest_pcs_server()
-    if (fastServer)
+    if fastServer:
 	global PCS_URL_D
 	PCS_URL_D = 'https://{0}/rest/2.0/pcs/'.format(fastServer)
 
